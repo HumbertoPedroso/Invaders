@@ -6,16 +6,20 @@
     <title>Space Invaders</title>
     <style>
         body { margin: 24px; background: #111; color: white; text-align: center; font-family: Arial, sans-serif; }
-        canvas { display: block; width: min(100%, 800px); height: auto; margin: 20px auto; background: #000; }
+        canvas { display: block; width: min(100%, 1000px); height: auto; margin: 20px auto; background: #000; }
     </style>
 </head>
 <body>
-    <canvas id="jogo" width="800" height="600"></canvas>
+    <canvas id="jogo" width="1000" height="700"></canvas>
 
     <script>
         // Elementos do jogo e ajustes principais.
         const tela = document.getElementById("jogo");
         const desenho = tela.getContext("2d");
+        const spriteInvader = new Image();
+        spriteInvader.src = "sprite_invader.png";
+        const spriteNave = new Image();
+        spriteNave.src = "sprite_nave.png";
         const VELOCIDADE_JOGADOR = 5;
         const VELOCIDADE_TIRO = 7;
         const TEMPO_ENTRE_TIROS = 300;
@@ -30,7 +34,7 @@
 
         // Cria o jogador e posiciona os invasores em uma grade.
         function iniciarJogo() {
-            jogador = { x: 380, y: 550, largura: 40, altura: 20 };
+            jogador = { x: 472, y: 632, largura: 56, altura: 56 };
             invasores = [];
             tiros = [];
             direcaoInvasores = 1;
@@ -39,10 +43,10 @@
             for (let linha = 0; linha < 3; linha++) {
                 for (let coluna = 0; coluna < 8; coluna++) {
                     invasores.push({
-                        x: 120 + coluna * 70,
-                        y: 70 + linha * 45,
-                        largura: 24,
-                        altura: 20
+                        x: 224 + coluna * 72,
+                        y: 65 + linha * 55,
+                        largura: 48,
+                        altura: 48
                     });
                 }
             }
@@ -73,7 +77,7 @@
             if (teclas.arrowright || teclas.d) jogador.x += VELOCIDADE_JOGADOR;
             jogador.x = Math.max(0, Math.min(tela.width - jogador.largura, jogador.x));
 
-            if (teclas[" "] && tempo - ultimoTiro > TEMPO_ENTRE_TIROS) {
+            if (teclas[" "] && tiros.length === 0 && tempo - ultimoTiro > TEMPO_ENTRE_TIROS) {
                 tiros.push({
                     x: jogador.x + jogador.largura / 2 - 2,
                     y: jogador.y,
@@ -117,9 +121,17 @@
             desenho.clearRect(0, 0, tela.width, tela.height);
             desenho.fillStyle = "white";
 
-            desenho.fillRect(jogador.x, jogador.y, jogador.largura, jogador.altura);
+            if (spriteNave.complete && spriteNave.naturalWidth > 0) {
+                desenho.drawImage(spriteNave, jogador.x, jogador.y, jogador.largura, jogador.altura);
+            } else {
+                desenho.fillRect(jogador.x, jogador.y, jogador.largura, jogador.altura);
+            }
             for (const invasor of invasores) {
-                desenho.fillRect(invasor.x, invasor.y, invasor.largura, invasor.altura);
+                if (spriteInvader.complete && spriteInvader.naturalWidth > 0) {
+                    desenho.drawImage(spriteInvader, invasor.x, invasor.y, invasor.largura, invasor.altura);
+                } else {
+                    desenho.fillRect(invasor.x, invasor.y, invasor.largura, invasor.altura);
+                }
             }
             for (const tiro of tiros) {
                 desenho.fillRect(tiro.x, tiro.y, tiro.largura, tiro.altura);
