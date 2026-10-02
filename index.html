@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Invaders</title>
+    <style>
+        body { margin: 24px; background: #111; color: white; text-align: center; font-family: Arial, sans-serif; }
+        canvas { display: block; width: min(100%, 800px); height: auto; margin: 20px auto; background: #000; }
+    </style>
+</head>
+<body>
+    <h1>Space Invaders</h1>
+    <p>← → para mover · Espaço para atirar</p>
+    <canvas id="jogo" width="800" height="600"></canvas>
+
+    <script>
+        // Elementos do jogo e ajustes principais.
+        const tela = document.getElementById("jogo");
+        const desenho = tela.getContext("2d");
+        const VELOCIDADE_JOGADOR = 5;
+        const VELOCIDADE_TIRO = 7;
+        const TEMPO_ENTRE_TIROS = 300;
+        const teclas = {};
+
+        // Estado atual do jogo.
+        let jogador;
+        let invasores;
+        let tiros;
+        let direcaoInvasores;
+        let ultimoTiro;
+
+        // Cria o jogador e posiciona os invasores em uma grade.
+        function iniciarJogo() {
+            jogador = { x: 380, y: 550, largura: 40, altura: 20 };
+            invasores = [];
+            tiros = [];
+            direcaoInvasores = 1;
+            ultimoTiro = 0;
+
+            for (let linha = 0; linha < 3; linha++) {
+                for (let coluna = 0; coluna < 8; coluna++) {
+                    invasores.push({
+                        x: 120 + coluna * 70,
+                        y: 70 + linha * 45,
+                        largura: 24,
+                        altura: 20
+                    });
+                }
+            }
+        }
+
+        // Guarda quais teclas estão pressionadas.
+        document.addEventListener("keydown", evento => {
+            const tecla = evento.key.toLowerCase();
+            if (["arrowleft", "arrowright", " "].includes(tecla)) evento.preventDefault();
+            teclas[tecla] = true;
+        });
+
+        document.addEventListener("keyup", evento => {
+            teclas[evento.key.toLowerCase()] = false;
+        });
+
+        // Verifica se dois retângulos se encostam.
+        function colidiu(a, b) {
+            return a.x < b.x + b.largura &&
+                a.x + a.largura > b.x &&
+                a.y < b.y + b.altura &&
+                a.y + a.altura > b.y;
+        } 
+
+        // Move o jogador, os invasores e os tiros; também verifica colisões.
+        function atualizarJogo(tempo) {
+            if (teclas.arrowleft || teclas.a) jogador.x -= VELOCIDADE_JOGADOR;
+            if (teclas.arrowright || teclas.d) jogador.x += VELOCIDADE_JOGADOR;
+            jogador.x = Math.max(0, Math.min(tela.width - jogador.largura, jogador.x));
+
+            if (teclas[" "] && tempo - ultimoTiro > TEMPO_ENTRE_TIROS) {
+                tiros.push({
+                    x: jogador.x + jogador.largura / 2 - 2,
+                    y: jogador.y,
+                    largura: 4,
+                    altura: 10
+                });
+                ultimoTiro = tempo;
+            }
+
+            // Os invasores andam juntos e descem quando chegam à borda.
+            let chegouNaBorda = false;
+            for (const invasor of invasores) {
+                invasor.x += direcaoInvasores;
+                if (invasor.x <= 10 || invasor.x + invasor.largura >= tela.width - 10) {
+                    chegouNaBorda = true;
+                }
+            }
+            if (chegouNaBorda) {
+                direcaoInvasores *= -1;
+                for (const invasor of invasores) invasor.y += 16;
+            }
+
+            for (const tiro of tiros) tiro.y -= VELOCIDADE_TIRO;
+
+            // Remove invasores atingidos pelos tiros.
+            for (let i = invasores.length - 1; i >= 0; i--) {
+                for (let j = tiros.length - 1; j >= 0; j--) {
+                    if (colidiu(invasores[i], tiros[j])) {
+                        invasores.splice(i, 1);
+                        tiros.splice(j, 1);
+                        break;
+                    }
+                }
+            }
+
+            tiros = tiros.filter(tiro => tiro.y + tiro.altura > 0);
+        }
+
+        // Desenha tudo como retângulos simples.
+        function desenharJogo() {
+            desenho.clearRect(0, 0, tela.width, tela.height);
+            desenho.fillStyle = "white";
+
+            desenho.fillRect(jogador.x, jogador.y, jogador.largura, jogador.altura);
+            for (const invasor of invasores) {
+                desenho.fillRect(invasor.x, invasor.y, invasor.largura, invasor.altura);
+            }
+            for (const tiro of tiros) {
+                desenho.fillRect(tiro.x, tiro.y, tiro.largura, tiro.altura);
+            }
+        }
+
+        // Atualiza e redesenha o jogo a cada quadro.
+        function loop(tempo) {
+            atualizarJogo(tempo);
+            desenharJogo();
+            requestAnimationFrame(loop);
+        }
+
+        iniciarJogo();
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>
