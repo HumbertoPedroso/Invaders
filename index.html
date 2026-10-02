@@ -13,7 +13,6 @@
     <canvas id="jogo" width="1000" height="700"></canvas>
 
     <script>
-        // Elementos do jogo e ajustes principais.
         const tela = document.getElementById("jogo");
         const desenho = tela.getContext("2d");
         const fundo = new Image();
@@ -27,14 +26,12 @@
         const TEMPO_ENTRE_TIROS = 300;
         const teclas = {};
 
-        // Estado atual do jogo.
         let jogador;
         let invasores;
         let tiros;
         let direcaoInvasores;
         let ultimoTiro;
 
-        // Cria o jogador e posiciona os invasores em uma grade.
         function iniciarJogo() {
             jogador = { x: 472, y: 632, largura: 56, altura: 56 };
             invasores = [];
@@ -54,7 +51,6 @@
             }
         }
 
-        // Guarda quais teclas estão pressionadas.
         document.addEventListener("keydown", evento => {
             const tecla = evento.key.toLowerCase();
             if (["arrowleft", "arrowright", " "].includes(tecla)) evento.preventDefault();
@@ -73,7 +69,6 @@
                 a.y + a.altura > b.y;
         } 
 
-        // Move o jogador, os invasores e os tiros; também verifica colisões.
         function atualizarJogo(tempo) {
             if (teclas.arrowleft || teclas.a) jogador.x -= VELOCIDADE_JOGADOR;
             if (teclas.arrowright || teclas.d) jogador.x += VELOCIDADE_JOGADOR;
@@ -89,7 +84,6 @@
                 ultimoTiro = tempo;
             }
 
-            // Os invasores andam juntos e descem quando chegam à borda.
             let chegouNaBorda = false;
             for (const invasor of invasores) {
                 invasor.x += direcaoInvasores;
@@ -104,7 +98,6 @@
 
             for (const tiro of tiros) tiro.y -= VELOCIDADE_TIRO;
 
-            // Remove invasores atingidos pelos tiros.
             for (let i = invasores.length - 1; i >= 0; i--) {
                 for (let j = tiros.length - 1; j >= 0; j--) {
                     if (colidiu(invasores[i], tiros[j])) {
@@ -118,7 +111,6 @@
             tiros = tiros.filter(tiro => tiro.y + tiro.altura > 0);
         }
 
-        // Desenha tudo como retângulos simples.
         function desenharJogo() {
             desenho.clearRect(0, 0, tela.width, tela.height);
             if (fundo.complete && fundo.naturalWidth > 0) {
@@ -143,7 +135,6 @@
             }
         }
 
-        // Atualiza e redesenha o jogo a cada quadro.
         function loop(tempo) {
             atualizarJogo(tempo);
             desenharJogo();
