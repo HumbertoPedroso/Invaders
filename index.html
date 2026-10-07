@@ -70,8 +70,8 @@
         } 
 
         function atualizarJogo(tempo) {
-            if (teclas.arrowleft || teclas.a) jogador.x -= VELOCIDADE_JOGADOR;
-            if (teclas.arrowright || teclas.d) jogador.x += VELOCIDADE_JOGADOR;
+            if (teclas.arrowleft) jogador.x -= VELOCIDADE_JOGADOR;
+            if (teclas.arrowright) jogador.x += VELOCIDADE_JOGADOR;
             jogador.x = Math.max(0, Math.min(tela.width - jogador.largura, jogador.x));
 
             if (teclas[" "] && tiros.length === 0 && tempo - ultimoTiro > TEMPO_ENTRE_TIROS) {
